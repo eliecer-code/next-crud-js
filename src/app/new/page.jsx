@@ -1,12 +1,26 @@
 "use client"
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Button from '@/components/buttonEdit/Button'
+import { AiFillSave } from 'react-icons/ai'
 
-const TaskForm = () => {
+const TaskForm = ({ params }) => {
+
     const router = useRouter()
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+
+    useEffect(() => {
+        if (params.id) {
+            fetch(`/api/tasks/${params.id}`)
+                .then(res => res.json())
+                .then(data => {
+                    setTitle(data.title)
+                    setDescription(data.description)
+                })
+        }
+    }, [])
 
     const onChangeText = (event) => {
         const title = event.target.value
@@ -18,50 +32,57 @@ const TaskForm = () => {
     }
     const onChangeSubmit = async (event) => {
         event.preventDefault()
-        const res = await fetch('/api/tasks', {
-            method: 'POST',
-            body: JSON.stringify({ title, description }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        const data = await res.json();
+        if (params.id) {
+            const res = await fetch(`/api/tasks/${params.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ title, description }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+        } else {
+            const res = await fetch('/api/tasks', {
+                method: 'POST',
+                body: JSON.stringify({ title, description }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            const data = await res.json();
+        }
+        router.refresh()
         router.push('/')
-        return data
     }
     return (
 
-        <div
-            className='w-full h-screen flex justify-center items-center'
-        >
+        <div className='w-full min-h-screen flex justify-center items-center p-5'>
             <form
                 onSubmit={onChangeSubmit}
-                action=""
-                className='flex justify-center items-center flex-col rounded-2xl gap-5 w-auto bg-slate-400 h-3/6 p-5'>
-
+                className='w-full sm:max-w-md bg-slate-400 p-5 rounded-2xl'
+            >
                 <input
-                    type="text"
-                    className='rounded-md w-96 h-10 text-cyan-800 pl-1'
-                    placeholder='title'
+                    type='text'
+                    className='w-full h-10 text-cyan-800 pl-2 mb-3 rounded-md'
+                    placeholder='Title'
                     value={title}
                     onChange={onChangeText}
+                    required
                 />
                 <textarea
                     rows={5}
                     placeholder='Description'
-                    type="text"
-                    className='rounded-md w-full text-cyan-800 pl-1'
+                    className='w-full text-cyan-800 pl-2 mb-3 rounded-md'
                     value={description}
                     onChange={onChangeDescription}
                 />
-                <button
+                <Button
                     type='submit'
-                    className='w-full bg-green-700 p-5 rounded-xl hover:bg-green-500'
-                >
-                    SAVE
-                </button >
+                    className='flex justify-center items-center w-full bg-green-700 p-3 rounded-xl hover:bg-green-500'
+                    icon={<AiFillSave className='text-2xl' />}
+                />
             </form>
-        </div >
+        </div>
     )
 }
 
