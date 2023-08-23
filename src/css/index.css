@@ -1,0 +1,13 @@
+@keyframes expand {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+.animate-expand {
+    animation: expand 0.5s ease-out forwards;
+}
